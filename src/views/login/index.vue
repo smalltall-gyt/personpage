@@ -3,87 +3,98 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">Login Form</h3>
+        <h3 class="title">个人博客后台系统</h3>
       </div>
-
-      <el-form-item prop="username">
+      <!-- 账号 -->
+      <el-form-item prop="loginId">
         <span class="svg-container">
           <svg-icon icon-class="user" />
         </span>
         <el-input
-          ref="username"
-          v-model="loginForm.username"
-          placeholder="Username"
-          name="username"
+          ref="loginId"
+          v-model="loginForm.loginId"
+          placeholder="请输入管理员账号"
+          name="loginId"
           type="text"
           tabindex="1"
           auto-complete="on"
         />
       </el-form-item>
-
-      <el-form-item prop="password">
+      <!-- 密码 -->
+      <el-form-item prop="loginPwd">
         <span class="svg-container">
           <svg-icon icon-class="password" />
         </span>
         <el-input
-          :key="passwordType"
-          ref="password"
-          v-model="loginForm.password"
-          :type="passwordType"
-          placeholder="Password"
-          name="password"
+          :key="loginPwdType"
+          ref="loginPwd"
+          v-model="loginForm.loginPwd"
+          :type="loginPwdType"
+          placeholder="请输入管理员密码"
+          name="loginPwd"
           tabindex="2"
           auto-complete="on"
           @keyup.enter.native="handleLogin"
         />
         <span class="show-pwd" @click="showPwd">
-          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+          <svg-icon :icon-class="loginPwdType === 'loginPwd' ? 'eye' : 'eye-open'" />
         </span>
       </el-form-item>
-
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
-
-      <div class="tips">
-        <span style="margin-right:20px;">username: admin</span>
-        <span> password: any</span>
+      <!-- 验证码 -->
+      <div class="captcha-container">
+        <el-form-item prop="captcha" class="captcha-inputer">
+          <span class="svg-container">
+            <svg-icon icon-class="nested" />
+          </span>
+          <el-input
+            ref="captcha"
+            v-model="loginForm.captcha"
+            placeholder="请输入验证码"
+            name="captcha"
+            tabindex="3"
+            type="text"
+            @keyup.enter.native="handleLogin"
+          />
+        </el-form-item>
+        <div class="captcha" @click="fetchCaptcha" v-html="captchaSvg"></div>
       </div>
+      <!-- 7天内免登陆 -->
+      <el-checkbox v-model="loginForm.checked" class="check-box">7天内免登陆</el-checkbox>
+
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登录</el-button>
 
     </el-form>
   </div>
 </template>
 
 <script>
-import { validUsername } from '@/utils/validate'
+import { getCaptcha } from '@/api/login'
 
 export default {
   name: 'Login',
+  created () {
+    this.fetchCaptcha()
+  },
   data() {
-    const validateUsername = (rule, value, callback) => {
-      if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
-      } else {
-        callback()
-      }
-    }
-    const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
-      } else {
-        callback()
-      }
-    }
     return {
       loginForm: {
-        username: 'admin',
-        password: '111111'
+        loginId: '',
+        loginPwd: '',
+        captcha: '',
+        checked: false
       },
+      // 登录校验规则
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+        loginId: [{ required: true, trigger: 'blur', message: '请输入管理员账号' }],
+        loginPwd: [{ required: true, trigger: 'blur', message: '请输入密码' }, {
+          min: 6, message: '密码长度必须大于6位', trigger: 'blur'
+        }],
+        captcha: [{required: true, trigger: 'blur', message: '请输入验证码'}]
       },
       loading: false,
-      passwordType: 'password',
-      redirect: undefined
+      loginPwdType: 'loginPwd',
+      redirect: undefined,
+      captchaSvg: ''
     }
   },
   watch: {
@@ -96,30 +107,56 @@ export default {
   },
   methods: {
     showPwd() {
-      if (this.passwordType === 'password') {
-        this.passwordType = ''
+      if (this.loginPwdType === 'loginPwd') {
+        this.loginPwdType = ''
       } else {
-        this.passwordType = 'password'
+        this.loginPwdType = 'loginPwd'
       }
       this.$nextTick(() => {
-        this.$refs.password.focus()
+        this.$refs.loginPwd.focus()
       })
     },
+    // 登录处理
     handleLogin() {
-      this.$refs.loginForm.validate(valid => {
+      this.$refs.loginForm.validate((valid, object) => {
         if (valid) {
+          if (this.loginForm.checked) {
+            this.loginForm.remember = 7
+          }
           this.loading = true
-          this.$store.dispatch('user/login', this.loginForm).then(() => {
+          this.$store.dispatch('user/login', this.loginForm).then((data) => {
+            console.log('进入了这里')
             this.$router.push({ path: this.redirect || '/' })
             this.loading = false
-          }).catch(() => {
+          }).catch((res) => {
+            if (typeof res === 'object') {
+              // 说明是账号密码错误
+              this.$message.error('账号密码错误')
+            } else {
+              // 说明四验证码错误
+              this.$message.error('验证码错误')
+            }
+            // 重新获取验证码
+            this.fetchCaptcha()
             this.loading = false
+            this.loginForm.captcha = ''
           })
         } else {
-          console.log('error submit!!')
+          if (object.loginId) {
+            this.$message.error(object.loginId[0].message);
+          } else if(object.loginPwd) {
+            this.$message.error(object.loginPwd[0].message)
+          } else if(object.captcha) {
+            this.$message.error(object.captcha[0].message)
+          }
           return false
         }
       })
+    },
+    // 获取验证码
+    async fetchCaptcha () {
+      const res = await getCaptcha()
+      this.captchaSvg = res
     }
   }
 }
@@ -233,5 +270,19 @@ $light_gray:#eee;
     cursor: pointer;
     user-select: none;
   }
+}
+.captcha-container {
+  display: flex;
+}
+.captcha-inputer {
+  width: 70%;
+}
+.captcha {
+  cursor: pointer;
+  width: 150px;
+  height: 50px;
+}
+.check-box {
+  margin-bottom: 22px;
 }
 </style>
