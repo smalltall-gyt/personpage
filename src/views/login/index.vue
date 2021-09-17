@@ -92,7 +92,7 @@ export default {
         captcha: [{required: true, trigger: 'blur', message: '请输入验证码'}]
       },
       loading: false,
-      loginPwdType: 'loginPwd',
+      loginPwdType: 'password',
       redirect: undefined,
       captchaSvg: ''
     }
@@ -125,7 +125,10 @@ export default {
           }
           this.loading = true
           this.$store.dispatch('user/login', this.loginForm).then((data) => {
-            console.log('进入了这里')
+            this.$message({
+              type: 'success',
+              message: '登录成功'
+            })
             this.$router.push({ path: this.redirect || '/' })
             this.loading = false
           }).catch((res) => {
