@@ -20,7 +20,7 @@ export default {
   props: {
     imgSrc: {
       type: String,
-      required: true
+      default: ''
     }
   },
   data () {
@@ -30,7 +30,11 @@ export default {
   },
   computed: {
     imageUrl () {
-      return baseURL + this.imgSrc
+      if (this.imgSrc) {
+        return baseURL + this.imgSrc
+      } else {
+        return ''
+      }
     },
     headers () {
       return {
@@ -51,8 +55,6 @@ export default {
 
 <style lang="scss" scoped>
  .avatar-uploader .el-upload {
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
     cursor: pointer;
     position: relative;
     overflow: hidden;
@@ -66,19 +68,18 @@ export default {
     width: 178px;
     height: 178px;
     text-align: center;
+    line-height: 178px;
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+  }
+  .upload-container {
+    width: 180px;
+    height: 180px;
   }
   .avatar {
     object-fit: cover;
     width: 180px;
     height: 180px;
     display: block;
-  }
-  .uploads {
-    display: flex;
-    margin-top: 50px;
-  }
-  .avatar-uploader {
-    border: 1px dotted #ccc;
-    margin-right: 80px;
   }
 </style>

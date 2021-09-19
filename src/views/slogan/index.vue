@@ -166,6 +166,7 @@ export default {
   }
   .form-item-img {
     display: flex;
+    margin-right: 50px;
   }
   ::v-deep .el-form-item__content {
     line-height: unset;

@@ -90,6 +90,13 @@ export const constantRoutes = [
         name: 'BlogType',
         component: () => import('@/views/blogType/index'),
         meta: { title: '文章分类', icon: 'el-icon-menu', auth: true }
+      },
+      {
+        path: 'edit/:id',
+        name: 'editBlog',
+        component: () => import('@/views/editBlog/index'),
+        meta: { title: '文章编辑', icon: 'el-icon-circle-plus-outline', auth: true},
+        hidden: true
       }
     ]
   },
