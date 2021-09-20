@@ -12,6 +12,7 @@
       :initialValue="form.editorText"
       height="500px"
       ref="toastuiEditor"
+      :options="editorOptions"
     ></Editor>
     <!-- 文章描述 -->
     <div class="block">文章描述</div>
@@ -40,6 +41,7 @@ import '@toast-ui/editor/dist/toastui-editor.css'
 import { Editor } from '@toast-ui/vue-editor'
 import Upload from '@/components/Upload'
 import { getBlogType, addBlog } from '@/api/blog'
+import '@toast-ui/editor/dist/i18n/zh-cn'
 
 export default {
   data () {
@@ -52,6 +54,9 @@ export default {
         thumb: '', // 文章头图
       },
       blogType: [], // 存放博客分类
+      editorOptions: {
+        language: 'zh-CN'
+      }
     }
   },
   created () {

@@ -1,10 +1,16 @@
 <template>
-  <div class="add-project-container">新增项目</div>
+  <div class="add-project-container">
+    <EditProject />
+  </div>
 </template>
 
 <script>
-export default {
+import EditProject from '@/components/EditProject'
 
+export default {
+  components: {
+    EditProject
+  }
 }
 </script>
 
