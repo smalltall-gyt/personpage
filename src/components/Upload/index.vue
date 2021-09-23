@@ -7,7 +7,7 @@
       :show-file-list="false"
       :on-success="handleSuccess"
     >
-      <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+      <img v-if="imageUrl" :src="imageUrl" class="avatar" :style="imgSize"/>
       <i v-else class="el-icon-plus avatar-uploader-icon"></i>
     </el-upload>
   </div>
@@ -21,6 +21,15 @@ export default {
     imgSrc: {
       type: String,
       default: ''
+    },
+    imgSize: {
+      type: Object,
+      default () {
+        return {
+          width: '180px',
+          height: '180px'
+        }
+      }
     }
   },
   data () {
@@ -31,7 +40,11 @@ export default {
   computed: {
     imageUrl () {
       if (this.imgSrc) {
-        return baseURL + this.imgSrc
+        if (this.imgSrc.includes('http') || this.imgSrc.includes('https')) {
+          return this.imgSrc
+        } else {
+          return baseURL + this.imgSrc
+        }
       } else {
         return ''
       }

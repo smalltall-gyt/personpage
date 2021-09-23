@@ -72,11 +72,9 @@ const actions = {
   },
 
   // user logout
-  logout({ commit, state }) {
+  logout(context) {
     return new Promise((resolve, reject) => {
-      localStorage.removeItem('adminToken')
-      resetRouter()
-      commit('RESET_STATE')
+      context.commit('SET_USER', null)
       resolve()
     })
   },

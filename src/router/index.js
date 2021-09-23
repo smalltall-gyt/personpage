@@ -168,6 +168,19 @@ export const constantRoutes = [
       }
     ]
   },
+  {
+    path: '/personalSetting',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'personalSetting',
+        component: () => import('@/views/personalSetting/index.vue'),
+        meta: { title: '个人中心', icon: 'el-icon-setting', auth: true },
+        hidden: true
+      }
+    ]
+  },
   // {
   //   path: '/form',
   //   component: Layout,
